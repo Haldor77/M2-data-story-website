@@ -1,5 +1,6 @@
 # M2 Data Story Website
 
+Welkom!
 _Een statische data story over CO₂-uitstoot en gezonde levensverwachting (HALE)._
 
 ## Structuur
