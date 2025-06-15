@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Impact of CO₂ Emissions on Healthy Life Expectancy</title>
+  <!-- Include Plotly for interactive charts -->
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; padding: 0; line-height: 1.6; }
+    header { background: #2c3e50; color: #ecf0f1; padding: 1rem; text-align: center; }
+    section { padding: 2rem; }
+    h2 { color: #34495e; }
+    .chart-container { width: 100%; max-width: 800px; margin: 2rem auto; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Impact of CO₂ Emissions on Healthy Life Expectancy (2000–2021)</h1>
+  </header>
+
+  <section id="introduction">
+    <h2>Introduction</h2>
+    <p>This interactive analysis explores two perspectives on how CO₂ emissions relate to healthy life expectancy at birth. Use the charts below to examine global trends, country comparisons, and historical patterns.</p>
+  </section>
+
+  <section id="perspective1">
+    <h2>Perspective 1: Emissions Harm Healthy Lifespans</h2>
+    <div class="chart-container" id="chart1"></div>
+    <div class="chart-container" id="chart2"></div>
+    <div class="chart-container" id="chart3"></div>
+  </section>
+
+  <section id="perspective2">
+    <h2>Perspective 2: Development Drives Longevity</h2>
+    <div class="chart-container" id="chart4"></div>
+    <div class="chart-container" id="chart5"></div>
+    <div class="chart-container" id="chart6"></div>
+  </section>
+
+  <section id="conclusion">
+    <h2>Conclusion</h2>
+    <p>Data shows that healthy life expectancy correlates strongly with development, even as emissions rise. Sustainable development and clean technologies can support health gains without sacrificing environmental goals.</p>
+  </section>
+
+  <script>
+    // Load data (replace this URL with your CSV/JSON data file in your repo)
+    const dataUrl = 'data/merged_data.csv';
+
+    async function loadData() {
+      const response = await fetch(dataUrl);
+      const text = await response.text();
+      return Plotly.d3.csvParse(text);
+    }
+
+    // Chart 1: CO₂ per Capita vs HALE (2019)
+    async function drawChart1() {
+      const rows = (await loadData()).filter(r => +r.year === 2019);
+      const trace = {
+        x: rows.map(r => +r.co2_per_capita),
+        y: rows.map(r => +r.healthy_life_expectancy_at_birth),
+        mode: 'markers',
+        type: 'scatter',
+        text: rows.map(r => r.country)
+      };
+      const layout = {
+        title: 'CO₂ per Capita vs Healthy Life Expectancy (2019)',
+        xaxis: { title: 'CO₂ per Capita (t)' },
+        yaxis: { title: 'HALE (years)' }
+      };
+      Plotly.newPlot('chart1', [trace], layout);
+    }
+
+    // Chart 2: Change in CO₂ vs Change in HALE (2000–2021)
+    async function drawChart2() {
+      const data = await loadData();
+      const byCountry = {};
+      data.forEach(r => {
+        if (!byCountry[r.country]) byCountry[r.country] = {};
+        byCountry[r.country][r.year] = r;
+      });
+      const countries = Object.keys(byCountry).filter(c => byCountry[c]['2000'] && byCountry[c]['2021']);
+      const trace = {
+        x: countries.map(c => +byCountry[c]['2021'].co2_per_capita - +byCountry[c]['2000'].co2_per_capita),
+        y: countries.map(c => +byCountry[c]['2021'].healthy_life_expectancy_at_birth - +byCountry[c]['2000'].healthy_life_expectancy_at_birth),
+        mode: 'markers',
+        type: 'scatter',
+        text: countries
+      };
+      const layout = {
+        title: 'Δ CO₂ per Capita vs Δ HALE (2000–2021)',
+        xaxis: { title: 'Δ CO₂ per Capita (t)' },
+        yaxis: { title: 'Δ HALE (years)' }
+      };
+      Plotly.newPlot('chart2', [trace], layout);
+    }
+
+    // Chart 3: Yearly Global Averages (2000–2021)
+    async function drawChart3() {
+      const data = await loadData();
+      const years = [...new Set(data.map(r => +r.year))].sort((a,b)=>a-b);
+      const avgCo2 = years.map(y => d3.mean(data.filter(r=>+r.year===y), d=>+d.co2_per_capita));
+      const avgHale = years.map(y => d3.mean(data.filter(r=>+r.year===y), d=>+d.healthy_life_expectancy_at_birth));
+      const trace1 = { x: years, y: avgCo2, mode: 'lines+markers', name: 'Avg CO₂ per Capita' };
+      const trace2 = { x: years, y: avgHale, mode: 'lines+markers', name: 'Avg HALE' };
+      const layout = { title: 'Global Averages Over Time', xaxis: { title: 'Year' }, yaxis: { title: 'Value' } };
+      Plotly.newPlot('chart3', [trace1, trace2], layout);
+    }
+
+    // Chart 4: GDP per Capita vs HALE (2019)
+    async function drawChart4() {
+      const rows = (await loadData()).filter(r => +r.year === 2019);
+      const trace = {
+        x: rows.map(r => +r.gdp_per_capita),
+        y: rows.map(r => +r.healthy_life_expectancy_at_birth),
+        mode: 'markers',
+        type: 'scatter',
+        text: rows.map(r => r.country)
+      };
+      const layout = {
+        title: 'GDP per Capita vs Healthy Life Expectancy (2019)',
+        xaxis: { title: 'GDP per Capita (USD)' },
+        yaxis: { title: 'HALE (years)' }
+      };
+      Plotly.newPlot('chart4', [trace], layout);
+    }
+
+    // Chart 5: CO₂ vs GDP per Capita (2019)
+    async function drawChart5() {
+      const rows = (await loadData()).filter(r => +r.year === 2019);
+      const trace = {
+        x: rows.map(r => +r.co2_per_capita),
+        y: rows.map(r => +r.gdp_per_capita),
+        mode: 'markers',
+        type: 'scatter',
+        text: rows.map(r => r.country)
+      };
+      const layout = {
+        title: 'CO₂ per Capita vs GDP per Capita (2019)',
+        xaxis: { title: 'CO₂ per Capita (t)' },
+        yaxis: { title: 'GDP per Capita (USD)' }
+      };
+      Plotly.newPlot('chart5', [trace], layout);
+    }
+
+    // Chart 6: GDP Growth vs HALE Growth (2000–2021)
+    async function drawChart6() {
+      const data = await loadData();
+      const byCountry = {};
+      data.forEach(r => {
+        if (!byCountry[r.country]) byCountry[r.country] = {};
+        byCountry[r.country][r.year] = r;
+      });
+      const countries = Object.keys(byCountry).filter(c => byCountry[c]['2000'] && byCountry[c]['2021']);
+      const trace = {
+        x: countries.map(c => (+byCountry[c]['2021'].gdp_per_capita - +byCountry[c]['2000'].gdp_per_capita) / +byCountry[c]['2000'].gdp_per_capita * 100),
+        y: countries.map(c => +byCountry[c]['2021'].healthy_life_expectancy_at_birth - +byCountry[c]['2000'].healthy_life_expectancy_at_birth),
+        mode: 'markers',
+        type: 'scatter',
+        text: countries
+      };
+      const layout = {
+        title: '% Δ GDP per Capita vs Δ HALE (2000–2021)',
+        xaxis: { title: '% Δ GDP per Capita' },
+        yaxis: { title: 'Δ HALE (years)' }
+      };
+      Plotly.newPlot('chart6', [trace], layout);
+    }
+
+    // Initialize all charts
+    async function init() {
+      await Promise.all([
+        drawChart1(),
+        drawChart2(),
+        drawChart3(),
+        drawChart4(),
+        drawChart5(),
+        drawChart6()
+      ]);
+    }
+
+    init();
+  </script>
+</body>
+</html>
