@@ -1,0 +1,47 @@
+body {
+  font-family: 'Open Sans', sans-serif;
+  color: #333;
+  line-height: 1.6;
+  margin: 0;
+  padding: 0;
+}
+header {
+  background: #f8f8f8;
+  padding: 1rem;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+nav ul {
+  list-style: none;
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  margin: 0;
+  padding: 0;
+}
+nav a {
+  text-decoration: none;
+  color: #006699;
+}
+nav a:hover {
+  text-decoration: underline;
+}
+main {
+  max-width: 800px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+  scroll-behavior: smooth;
+}
+section {
+  margin-bottom: 3rem;
+}
+figure {
+  margin: 1.5rem 0;
+  text-align: center;
+}
+figcaption {
+  font-size: 0.9rem;
+  color: #666;
+  margin-top: 0.5rem;
+}
