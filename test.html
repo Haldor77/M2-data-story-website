@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="utf-8">
+    <title>CO₂ vs Gezonde Levensverwachting</title>
+    <!-- Plotly.js via CDN -->
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</head>
+<body>
+    <!-- Hier komt de grafiek -->
+    <div id="plotly-div" style="width:100%;height:600px;"></div>
+    <script>
+        // Laad de gegenereerde figure JSON uit het HTML-bestand
+        fetch('visualization.html')
+            .then(response => response.text())
+            .then(html => {
+                // Inject de inhoud van het gecreëerde Plotly-HTML
+                document.body.innerHTML = html;
+            })
+            .catch(err => console.error('Fout bij laden grafiek:', err));
+    </script>
+</body>
+</html>
