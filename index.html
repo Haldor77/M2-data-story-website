@@ -46,14 +46,15 @@
 
     <section id="vergelijking">
       <h2>Vergelijking CO₂-uitstoot versus HALE</h2>
-      <div id="scatterChart"></div>
-      <p>Uitleg bij scatterplot…</p>
+      <div class="chart-container" id="placeholder1"></div>
+      <div class="chart-container" id="placeholder2"></div>
+      <p>Uitleg bij de grafieken…</p>
     </section>
-<!-- Voeg dit toe op de plek waar je de knop wilt zien -->
-<a href="co2_health_life_expectancy.html">
-  <button type="button">Bekijk impact CO₂ op levensverwachting</button>
-</a>
 
+    <!-- Knop naar detailpagina -->
+    <nav style="text-align:center; margin:2rem 0;">
+      <a href="co2_health_life_expectancy.html"><button type="button">Bekijk impact CO₂ op levensverwachting</button></a>
+    </nav>
 
     <section id="conclusie">
       <h2>Conclusie en Aanbevelingen</h2>
@@ -61,6 +62,22 @@
     </section>
   </main>
 
-  <script src="js/script.js"></script>
+  <!-- Inline placeholder chart scripts -->
+  <script>
+    // Voorbeeld staafgrafiek
+    Plotly.newPlot('placeholder1', [{
+      x: ['Land A', 'Land B', 'Land C'],
+      y: [5.1, 7.3, 4.8],
+      type: 'bar'
+    }], { title: 'Voorbeeld: CO₂-uitstoot per capita' });
+
+    // Voorbeeld lijngrafiek
+    Plotly.newPlot('placeholder2', [{
+      x: [2000, 2005, 2010, 2015, 2020],
+      y: [60, 62, 64, 66, 68],
+      mode: 'lines+markers',
+      type: 'scatter'
+    }], { title: 'Voorbeeld: Gezonde levensverwachting over tijd' });
+  </script>
 </body>
 </html>
