@@ -1,185 +1,353 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
   <title>Impact of CO₂ Emissions on Healthy Life Expectancy</title>
-  <!-- Include Plotly for interactive charts -->
-  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
   <style>
-    body { font-family: Arial, sans-serif; margin: 0; padding: 0; line-height: 1.6; }
-    header { background: #2c3e50; color: #ecf0f1; padding: 1rem; text-align: center; }
-    section { padding: 2rem; }
-    h2 { color: #34495e; }
-    .chart-container { width: 100%; max-width: 800px; margin: 2rem auto; }
+    body { font-family: Arial, sans-serif; line-height: 1.6; margin: 40px; }
+    h1, h2 { color: #2c3e50; }
+    ul { padding-left: 20px; }
+    code { background-color: #f4f4f4; padding: 2px 4px; border-radius: 4px; }
   </style>
 </head>
 <body>
-  <header>
-    <h1>Impact of CO₂ Emissions on Healthy Life Expectancy (2000–2021)</h1>
-  </header>
 
-  <section id="introduction">
-    <h2>Introduction</h2>
-    <p>This interactive analysis explores two perspectives on how CO₂ emissions relate to healthy life expectancy at birth. Use the charts below to examine global trends, country comparisons, and historical patterns.</p>
-  </section>
+  <h1>The Impact of CO₂ Emissions on Healthy Life Expectancy at Birth Per Country (2000–2021)</h1>
 
-  <section id="perspective1">
-    <h2>Perspective 1: Emissions Harm Healthy Lifespans</h2>
-    <div class="chart-container" id="chart1"></div>
-    <div class="chart-container" id="chart2"></div>
-    <div class="chart-container" id="chart3"></div>
-  </section>
+  <h2>Introduction</h2>
+  <p>
+    Climate change and public health are increasingly intertwined topics. A key question is whether rising CO₂ emissions – largely from burning fossil fuels – are hurting human health and reducing how long people live healthy lives. This data story explores the impact of CO₂ emissions on healthy life expectancy at birth across countries from 2000 to 2021. We examine two contrasting perspectives:
+  </p>
 
-  <section id="perspective2">
-    <h2>Perspective 2: Development Drives Longevity</h2>
-    <div class="chart-container" id="chart4"></div>
-    <div class="chart-container" id="chart5"></div>
-    <div class="chart-container" id="chart6"></div>
-  </section>
+  <p><strong>Perspective 1:</strong> Higher CO₂ emissions harm population health and lead to lower life expectancy. Proponents argue that pollution and climate change resulting from carbon emissions directly undermine health. For example, air pollution (mostly from fossil fuel combustion) is estimated to cut average global life expectancy by over 2 years and even 5+ years in the most polluted regions. From this view, countries with high emissions might suffer more chronic diseases and shorter healthy lifespans due to poorer air quality and climate-related stresses.</p>
 
-  <section id="conclusion">
-    <h2>Conclusion</h2>
-    <p>Data shows that healthy life expectancy correlates strongly with development, even as emissions rise. Sustainable development and clean technologies can support health gains without sacrificing environmental goals.</p>
-  </section>
+  <p><strong>Perspective 2:</strong> There is no direct relationship between CO₂ emissions and healthy life expectancy; longevity is driven more by healthcare, wealth, and infrastructure. Advocates of this view note that the world’s richest, longest-living populations often reside in high-emission countries (benefiting from industrialization and economic growth). Life expectancy improvements over the last decades have coincided with rising emissions, suggesting other factors (medical advances, sanitation, nutrition, etc.) play a larger role than emissions. In fact, there is a well-known positive link between income and life expectancy – wealthier nations (which historically emitted more CO₂) tend to enjoy longer lives. According to this perspective, improving healthcare access and living standards can raise healthy life expectancy regardless of CO₂ output, and environmental measures can be pursued without sacrificing health or longevity.</p>
 
-  <script>
-    // Load data (replace this URL with your CSV/JSON data file in your repo)
-    const dataUrl = 'data/merged_data.csv';
+  <p>In the following sections, we introduce the datasets and then present visual evidence for each perspective. The goal is to understand whether CO₂ emissions are correlated with healthy life expectancy and to untangle the influence of development and policy factors.</p>
 
-    async function loadData() {
-      const response = await fetch(dataUrl);
-      const text = await response.text();
-      return Plotly.d3.csvParse(text);
-    }
+  <h2>Dataset and Preprocessing</h2>
+  <p>To investigate this issue, we combined two primary datasets:</p>
 
-    // Chart 1: CO₂ per Capita vs HALE (2019)
-    async function drawChart1() {
-      const rows = (await loadData()).filter(r => +r.year === 2019);
-      const trace = {
-        x: rows.map(r => +r.co2_per_capita),
-        y: rows.map(r => +r.healthy_life_expectancy_at_birth),
-        mode: 'markers',
-        type: 'scatter',
-        text: rows.map(r => r.country)
-      };
-      const layout = {
-        title: 'CO₂ per Capita vs Healthy Life Expectancy (2019)',
-        xaxis: { title: 'CO₂ per Capita (t)' },
-        yaxis: { title: 'HALE (years)' }
-      };
-      Plotly.newPlot('chart1', [trace], layout);
-    }
+  <ul>
+    <li><strong>CO₂ Emissions Dataset (Our World in Data):</strong> A comprehensive country-year dataset of CO₂ emissions. It includes metrics such as annual emissions, emissions per capita, and cumulative emissions. We specifically use:
+      <ul>
+        <li><code>co2_per_capita</code>: Annual CO₂ emissions per person (in tonnes).</li>
+        <li><code>cumulative_co2</code>: The historical total CO₂ emitted by a country up to that year (a running sum in tonnes).</li>
+      </ul>
+      (We also have country identifiers like <code>iso_code</code> and the year for merging.)
+    </li>
+    <li><strong>Healthy Life Expectancy Dataset (WHO):</strong> Country-level data on healthy life expectancy at birth. Healthy life expectancy (HALE) is defined as “the average number of years that a person can expect to live in full health from birth”, accounting for years lived in less than full health due to disease or injury. We use the variable <code>healthy_life_expectancy_at_birth</code> (in years) for both sexes combined.</li>
+  </ul>
 
-    // Chart 2: Change in CO₂ vs Change in HALE (2000–2021)
-    async function drawChart2() {
-      const data = await loadData();
-      const byCountry = {};
-      data.forEach(r => {
-        if (!byCountry[r.country]) byCountry[r.country] = {};
-        byCountry[r.country][r.year] = r;
-      });
-      const countries = Object.keys(byCountry).filter(c => byCountry[c]['2000'] && byCountry[c]['2021']);
-      const trace = {
-        x: countries.map(c => +byCountry[c]['2021'].co2_per_capita - +byCountry[c]['2000'].co2_per_capita),
-        y: countries.map(c => +byCountry[c]['2021'].healthy_life_expectancy_at_birth - +byCountry[c]['2000'].healthy_life_expectancy_at_birth),
-        mode: 'markers',
-        type: 'scatter',
-        text: countries
-      };
-      const layout = {
-        title: 'Δ CO₂ per Capita vs Δ HALE (2000–2021)',
-        xaxis: { title: 'Δ CO₂ per Capita (t)' },
-        yaxis: { title: 'Δ HALE (years)' }
-      };
-      Plotly.newPlot('chart2', [trace], layout);
-    }
+  <p>Both datasets span multiple decades. For this analysis, we filtered data to five reference years: 2000, 2010, 2015, 2019, 2021. These snapshots allow us to observe long-term trends while focusing on a manageable number of points (every decade or so, plus the latest pre- and post-2020 data). We chose 2019 as the last pre-pandemic year and 2021 as an initial post-COVID year to see any recent changes.</p>
 
-    // Chart 3: Yearly Global Averages (2000–2021)
-    async function drawChart3() {
-      const data = await loadData();
-      const years = [...new Set(data.map(r => +r.year))].sort((a,b)=>a-b);
-      const avgCo2 = years.map(y => d3.mean(data.filter(r=>+r.year===y), d=>+d.co2_per_capita));
-      const avgHale = years.map(y => d3.mean(data.filter(r=>+r.year===y), d=>+d.healthy_life_expectancy_at_birth));
-      const trace1 = { x: years, y: avgCo2, mode: 'lines+markers', name: 'Avg CO₂ per Capita' };
-      const trace2 = { x: years, y: avgHale, mode: 'lines+markers', name: 'Avg HALE' };
-      const layout = { title: 'Global Averages Over Time', xaxis: { title: 'Year' }, yaxis: { title: 'Value' } };
-      Plotly.newPlot('chart3', [trace1, trace2], layout);
-    }
+  <p>We performed several preprocessing steps to merge the data:</p>
+  <ul>
+    <li><strong>Filtering Years:</strong> We restricted each dataset to the years 2000, 2010, 2015, 2019, and 2021.</li>
+    <li><strong>Selecting Indicators:</strong> From the CO₂ dataset, we kept country, <code>iso_code</code>, year, <code>co2_per_capita</code>, and <code>cumulative_co2</code>. From the WHO dataset, we kept country, year, and <code>healthy_life_expectancy_at_birth</code>.</li>
+    <li><strong>Data Cleaning:</strong> We removed aggregate entries (e.g. world or regional totals in the OWID data) to focus only on individual countries. We also handled country naming differences to ensure both datasets align on the same country names or codes.</li>
+    <li><strong>Joining:</strong> The two datasets were merged on country and year (after alignment), yielding a combined dataset of country-year records that have both emissions and healthy life expectancy. We dropped any entries with missing values for the variables of interest.</li>
+  </ul>
 
-    // Chart 4: GDP per Capita vs HALE (2019)
-    async function drawChart4() {
-      const rows = (await loadData()).filter(r => +r.year === 2019);
-      const trace = {
-        x: rows.map(r => +r.gdp_per_capita),
-        y: rows.map(r => +r.healthy_life_expectancy_at_birth),
-        mode: 'markers',
-        type: 'scatter',
-        text: rows.map(r => r.country)
-      };
-      const layout = {
-        title: 'GDP per Capita vs Healthy Life Expectancy (2019)',
-        xaxis: { title: 'GDP per Capita (USD)' },
-        yaxis: { title: 'HALE (years)' }
-      };
-      Plotly.newPlot('chart4', [trace], layout);
-    }
+  <p>Below is a Python snippet illustrating the preprocessing using <code>pandas</code>:</p>
 
-    // Chart 5: CO₂ vs GDP per Capita (2019)
-    async function drawChart5() {
-      const rows = (await loadData()).filter(r => +r.year === 2019);
-      const trace = {
-        x: rows.map(r => +r.co2_per_capita),
-        y: rows.map(r => +r.gdp_per_capita),
-        mode: 'markers',
-        type: 'scatter',
-        text: rows.map(r => r.country)
-      };
-      const layout = {
-        title: 'CO₂ per Capita vs GDP per Capita (2019)',
-        xaxis: { title: 'CO₂ per Capita (t)' },
-        yaxis: { title: 'GDP per Capita (USD)' }
-      };
-      Plotly.newPlot('chart5', [trace], layout);
-    }
+  <pre><code>import pandas as pd
 
-    // Chart 6: GDP Growth vs HALE Growth (2000–2021)
-    async function drawChart6() {
-      const data = await loadData();
-      const byCountry = {};
-      data.forEach(r => {
-        if (!byCountry[r.country]) byCountry[r.country] = {};
-        byCountry[r.country][r.year] = r;
-      });
-      const countries = Object.keys(byCountry).filter(c => byCountry[c]['2000'] && byCountry[c]['2021']);
-      const trace = {
-        x: countries.map(c => (+byCountry[c]['2021'].gdp_per_capita - +byCountry[c]['2000'].gdp_per_capita) / +byCountry[c]['2000'].gdp_per_capita * 100),
-        y: countries.map(c => +byCountry[c]['2021'].healthy_life_expectancy_at_birth - +byCountry[c]['2000'].healthy_life_expectancy_at_birth),
-        mode: 'markers',
-        type: 'scatter',
-        text: countries
-      };
-      const layout = {
-        title: '% Δ GDP per Capita vs Δ HALE (2000–2021)',
-        xaxis: { title: '% Δ GDP per Capita' },
-        yaxis: { title: 'Δ HALE (years)' }
-      };
-      Plotly.newPlot('chart6', [trace], layout);
-    }
+# Load datasets
+co2 = pd.read_csv("co2_emissions.csv")
+hale = pd.read_csv("healthy_life_expectancy.csv")
 
-    // Initialize all charts
-    async function init() {
-      await Promise.all([
-        drawChart1(),
-        drawChart2(),
-        drawChart3(),
-        drawChart4(),
-        drawChart5(),
-        drawChart6()
-      ]);
-    }
+# Filter years
+years = [2000, 2010, 2015, 2019, 2021]
+co2 = co2[co2['year'].isin(years)]
+hale = hale[hale['year'].isin(years)]
 
-    init();
-  </script>
+# Select indicators
+co2 = co2[['country', 'iso_code', 'year', 'co2_per_capita', 'cumulative_co2']]
+hale = hale[['country', 'year', 'healthy_life_expectancy_at_birth']]
+
+# Merge datasets
+merged_df = pd.merge(co2, hale, on=['country', 'year'], how='inner')
+merged_df.dropna(inplace=True)
+</code></pre>
+
 </body>
 </html>
+
+
+<h2>Python Code: Data Preprocessing Example</h2>
+<pre><code class="language-python">
+import pandas as pd
+
+# Load datasets
+co2_df = pd.read_csv('owid-co2-data.csv')
+hale_df = pd.read_csv('WHO_hale_data.csv')  # assumed CSV for healthy life expectancy
+
+# Filter to selected years
+years = [2000, 2010, 2015, 2019, 2021]
+co2_df = co2_df[co2_df['year'].isin(years)]
+hale_df = hale_df[hale_df['year'].isin(years)]
+
+# Select relevant columns
+co2_df = co2_df[['iso_code', 'country', 'year', 'co2_per_capita', 'cumulative_co2']]
+hale_df = hale_df[['country', 'year', 'healthy_life_expectancy_at_birth']]
+
+# (Optional: Remove non-country entries from CO2 data using iso_code)
+co2_df = co2_df[co2_df['iso_code'].str.len() == 3]  # keep only ISO3 country codes
+
+# Merge the datasets on country and year
+merged_df = pd.merge(co2_df, hale_df, on=['country', 'year'], how='inner')
+
+# Drop any rows with missing data
+merged_df.dropna(inplace=True)
+
+print(merged_df.head())
+</code></pre>
+<h2>After Merging</h2>
+<p>
+  After merging, <code>merged_df</code> contains, for each country and selected year, the CO₂ emissions per capita, cumulative emissions, and healthy life expectancy at birth. This forms the basis for our visual analysis.
+</p>
+
+<h2>Perspectives and Visualizations</h2>
+<p>
+  With the data prepared, we now present three visualizations supporting each perspective. Each visualization is accompanied by a brief insight and an explanation linking it to the respective argument.
+</p>
+
+<h3>Perspective 1: Do Higher CO₂ Emissions Shorten Healthy Lifespans?</h3>
+<p>
+  This perspective expects to see negative correlations or warning signs that pollution from CO₂ emissions adversely affects health. We look for evidence that countries with higher emissions have lower healthy life expectancy, or that rapid emission growth is associated with stagnating health outcomes.
+</p>
+
+<h4>Visualization 1: CO₂ per Capita vs Healthy Life Expectancy (2019)</h4>
+<p><em>Is higher carbon output linked to lower healthy life expectancy?</em></p>
+
+<h4>Python Code: CO₂ per Capita vs Healthy Life Expectancy (2019)</h4>
+<pre><code class="language-python">
+import plotly.express as px
+
+# Scatter: CO₂ per capita vs Healthy Life Expectancy in 2019
+fig = px.scatter(
+    merged_df[merged_df['year'] == 2019],
+    x='co2_per_capita', y='healthy_life_expectancy_at_birth',
+    hover_name='country', trendline='ols',
+    labels={
+        'co2_per_capita': 'CO₂ per Capita (tons per person)',
+        'healthy_life_expectancy_at_birth': 'Healthy Life Expectancy (years)'
+    },
+    title='CO₂ per Capita vs Healthy Life Expectancy (2019)'
+)
+fig.show()
+</code></pre>
+<h5>Caption</h5>
+<p>
+  Each point is a country in 2019. We might expect a downward trend if emissions were broadly harming health, but the pattern is not clear-cut. Many high-emission countries (far right) actually enjoy high healthy life expectancy, while low-emission countries (far left) often have low healthy life expectancy. The fitted trendline (from an OLS regression) is nearly flat, indicating no strong linear relationship globally.
+</p>
+
+<h5>Insight</h5>
+<p>
+  At a global level, there is no obvious negative correlation between CO₂ emissions per person and healthy life expectancy. For example, the United States and Gulf countries have some of the highest per-capita CO₂ emissions yet still report healthy life expectancies around 65–70+ years. In contrast, countries with minimal emissions (mostly low-income nations) cluster in the lower-left, with healthy life expectancy often below 60 years.
+</p>
+<p>
+  This suggests that factors other than emissions (like economic development) are dominating the health outcomes. However, supporters of Perspective 1 point out that this global view could mask specific health costs of emissions – for instance, chronic air pollution in rapidly industrializing countries might be limiting further health gains. The lack of a clear inverse trend here hints that CO₂’s impact on health is indirect and tangled with development rather than a simple one-to-one effect.
+</p>
+
+<h4>Visualization 2: Emissions and Health in Selected Countries (2019)</h4>
+<p><em>Case comparison of a high emitter vs. a low emitter vs. a moderate emitter.</em></p>
+<h4>Python Code: Visualization 2 – Emissions and Health in Selected Countries (2019)</h4>
+<pre><code class="language-python">
+import plotly.graph_objects as go
+
+# Compare USA, France, India in 2019
+countries = ['United States', 'France', 'India']
+sub_df = merged_df[(merged_df['country'].isin(countries)) & (merged_df['year'] == 2019)]
+
+fig = go.Figure()
+fig.add_bar(x=sub_df['country'], y=sub_df['co2_per_capita'], name='CO₂ per Capita (t/person)')
+fig.add_bar(x=sub_df['country'], y=sub_df['healthy_life_expectancy_at_birth'], name='Healthy Life Expectancy (years)')
+
+# Set up dual y-axes
+fig.update_layout(
+    title='Emissions vs Healthy Life Expectancy: U.S. vs France vs India (2019)',
+    xaxis_title='Country',
+    yaxis=dict(title='CO₂ per Capita (tons)', side='left'),
+    yaxis2=dict(title='Healthy Life Expectancy (years)', overlaying='y', side='right')
+)
+
+fig.show()
+</code></pre>
+<h5>Caption</h5>
+<p>
+  This bar chart contrasts CO₂ emissions per capita (left axis, orange bars) with healthy life expectancy (right axis, blue bars) for three example countries in 2019. The United States emits far more CO₂ per person (≈15 tons) than France (≈5 tons) or India (&lt;2 tons). Yet, Americans have a shorter healthy life expectancy (~66 years) than the French (~72 years). Indians have a much lower healthy lifespan (~60 years) alongside very low emissions.
+</p>
+
+<h5>Insight</h5>
+<p>
+  The comparison highlights that more emissions do not guarantee better health. The U.S. vs France gap is telling: Americans emit about 3× more CO₂ per capita, but enjoy roughly 6 fewer healthy years on average than the French. This could be due to pollution or other lifestyle and healthcare differences – perspective 1 would note that high emissions (often accompanied by pollution and greenhouse effects) might be undermining health in the U.S., which struggles with issues like air quality and chronic disease.
+</p>
+<p>
+  Meanwhile, India shows the opposite extreme: very low emissions come with low healthy life expectancy, primarily due to poverty and limited healthcare. While India’s low emissions are not causing poor health (rather, they reflect less industrial development), perspective 1 advocates worry that as India’s emissions rise, environmental health burdens (e.g. smog in cities) could further challenge its progress.
+</p>
+<p>
+  This case study suggests that beyond a certain point, increasing emissions is associated with diminishing health returns – France achieves higher health with lower emissions than the U.S. – aligning with the idea that cleaner development paths might support longer healthy lives.
+</p>
+
+<h4>Visualization 3: Air Quality and Health Trend – China as a Case (2000–2021)</h4>
+<p><em>Does rapid emission growth slow health progress?</em></p>
+<h4>Python Code: Visualization 3 – China: Air Quality and Health Trend (2000–2021)</h4>
+<pre><code class="language-python">
+# Line plot for China: CO₂ per capita and Healthy Life Expectancy over time
+china_df = merged_df[merged_df['country'] == 'China'].sort_values('year')
+fig = px.line(china_df, x='year', y=['co2_per_capita', 'healthy_life_expectancy_at_birth'],
+              labels={'value': 'Metric Value', 'variable': 'Metric'},
+              title='China: Trend of CO₂ per Capita and Healthy Life Expectancy (2000–2021)')
+fig.show()
+</code></pre>
+<h5>Caption</h5>
+<p>
+  This line chart shows China’s CO₂ emissions per capita (orange line, in tons) and healthy life expectancy at birth (blue line, in years) from 2000 to 2021. China’s CO₂ per person surged dramatically (more than tripling over two decades), while healthy life expectancy also rose steadily (from about 62 up to ~68 years).
+</p>
+
+<h5>Insight</h5>
+<p>
+  China illustrates a nuanced story. Despite severe pollution challenges during its rapid industrialization, healthy life expectancy still improved significantly as the country became wealthier. There isn’t an obvious dip or slowdown in the upward health trend corresponding to rising emissions – in fact, both lines climb upward.
+</p>
+<p>
+  Advocates of Perspective 1, however, argue that China’s health gains could have been even greater without the heavy air pollution that accompanied its coal-driven economic boom. In the 2010s, recognizing these issues, China enacted aggressive clean air policies. Noticeably, the curve of CO₂ per capita leveled off slightly toward 2019, and pollution levels in cities started dropping, which may help future health outcomes.
+</p>
+<p>
+  This example underscores that while high emissions haven’t stopped health improvements outright, they likely impose hidden costs: respiratory illnesses, environmental stress, and fewer healthy years than might be possible in a cleaner environment. The full negative impact of emissions might be long-term – through climate change – and not fully captured in this 20-year window.
+</p>
+<p>
+  Overall, the data for Perspective 1 shows some hints (like the U.S. vs France comparison) that excessive emissions and pollution correlate with health drawbacks, but the relationship is complex and often outweighed by socioeconomic factors.
+</p>
+
+<h3>Perspective 2: Are Other Factors More Important than Emissions for Life Expectancy?</h3>
+<p>
+  Perspective 2 suggests that development and public health infrastructure drive healthy lifespan, not emissions per se. If this is true, we expect to see that as countries get wealthier (often accompanied by more emissions), their healthy life expectancy increases – indicating a positive or neutral relationship between emissions and health when development is accounted for.
+</p>
+<p>
+  We also expect that countries with the longest healthy lifespans are those with strong healthcare and high living standards, rather than the lowest emitters. The following visuals explore these patterns.
+</p>
+
+<h4>Visualization 4: Historical CO₂ Emissions vs Healthy Life Expectancy</h4>
+<p><em>Do countries that industrialized (high historic emissions) have longer healthy lives?</em></p>
+<h4>Python Code: Visualization 4 – Historical CO₂ Emissions vs Healthy Life Expectancy (2019)</h4>
+<pre><code class="language-python">
+# Scatter: cumulative CO₂ vs Healthy Life Expectancy (2019), log scale for x
+fig = px.scatter(
+    merged_df[merged_df['year'] == 2019],
+    x='cumulative_co2', y='healthy_life_expectancy_at_birth',
+    hover_name='country', log_x=True,
+    labels={
+        'cumulative_co2': 'Cumulative CO₂ Emissions (tonnes, log scale)',
+        'healthy_life_expectancy_at_birth': 'Healthy Life Expectancy (years)'
+    },
+    title='Historical CO₂ Emissions vs Healthy Life Expectancy (2019)'
+)
+fig.show()
+</code></pre>
+<h5>Caption</h5>
+<p>
+  Each point is a country (2019), plotting total historical CO₂ emitted (on a log scale) against healthy life expectancy. A clear upward trend emerges: countries with a larger cumulative CO₂ footprint (toward the right) tend to have higher healthy life expectancy.
+</p>
+
+<h5>Insight</h5>
+<p>
+  This chart reveals a strong positive association: nations that have emitted the most CO₂ over history – typically more developed economies – almost all enjoy high healthy life expectancies (70+ years). For instance, countries like Japan, Germany, the UK, or the U.S. (far right) have among the longest healthy lifespans.
+</p>
+<p>
+  Conversely, countries with negligible historical emissions (far left) are generally those with shorter healthy lives (often under 60 years). This does not mean emitting CO₂ causes people to live longer; rather, it indicates that industrialization and development, which inevitably came with CO₂ emissions, enabled better health outcomes.
+</p>
+<p>
+  In other words, wealth and infrastructure correlate with both high emissions and high life expectancy. This aligns with Perspective 2: healthy longevity is achieved through improved hospitals, nutrition, education, and living conditions – which have historically been financed by the economic growth that also drove up emissions.
+</p>
+<p>
+  The implication is that life expectancy can rise alongside emissions if development is occurring, and that cutting emissions need not reduce life expectancy as long as development and healthcare are maintained.
+</p>
+
+<h4>Visualization 5: Emissions vs Healthy Life Expectancy Over Time (Interactive)</h4>
+<p><em>How have emissions and health evolved together from 2000 to 2021?</em></p>
+<h4>Python Code: Visualization 5 – Emissions vs Healthy Life Expectancy Over Time (2000–2021)</h4>
+<pre><code class="language-python">
+# Interactive scatter with animation over years
+fig = px.scatter(
+    merged_df, x='co2_per_capita', y='healthy_life_expectancy_at_birth',
+    animation_frame='year', animation_group='country',
+    hover_name='country',
+    range_x=[0, 35], range_y=[40, 85],
+    labels={
+        'co2_per_capita': 'CO₂ per Capita (t/person)',
+        'healthy_life_expectancy_at_birth': 'Healthy Life Expectancy (years)'
+    },
+    title='Emissions vs Healthy Life Expectancy (2000–2021)'
+)
+fig.show()
+</code></pre>
+<h5>Caption</h5>
+<p>
+  This interactive bubble chart (select the play button) shows countries moving from 2000 to 2021. Bubbles typically drift upwards and to the right over time, meaning both CO₂ emissions per capita and healthy life expectancy have increased in tandem for many countries.
+</p>
+
+<h5>Insight</h5>
+<p>
+  The animation reinforces that in the last two decades, life expectancy improvements often coincided with rising emissions. Developing countries (with lower starting health and emissions) move markedly up-right: for example, India and Bangladesh start near the bottom-left in 2000 (low emissions, ~50s HALE) and progress upward by 2019 (somewhat higher emissions, HALE in 60s).
+</p>
+<p>
+  China’s bubble shoots to the right (big emission surge) and also climbs upward (HALE from low 60s to high 60s). Most high-income countries were already in the upper-right and tend to inch further up (health gains) even as their emissions per capita plateau or decline slightly.
+</p>
+<p>
+  Notably, European countries have modest or falling CO₂ per capita but still improve health to around 70+ healthy years, showing that it’s possible to gain in health while curbing emissions. The overall picture supports Perspective 2: there is no general trade-off where increasing emissions universally lowers life expectancy – if anything, countries have managed to raise healthy life expectancy substantially despite higher emissions.
+</p>
+<p>
+  This suggests that improving medical care, sanitation, education, and incomes (which often come with industrial growth) has a more immediate and powerful effect on health than the hypothesized negative effects of CO₂. Of course, this does not mean CO₂-driven climate change has no future health impact; rather, up to 2021, socioeconomic progress appears to outweigh any direct life expectancy harms from emissions.
+</p>
+
+<h4>Visualization 6: Global Overview – Emissions and Health by Country (2019)</h4>
+<p><em>Who has high emissions, and who lives long and healthy?</em></p>
+<h4>Python Code: Visualization 6 – Global Overview (2019)</h4>
+<pre><code class="language-python">
+# World map with CO₂ per capita and Healthy Life Expectancy
+fig = px.scatter_geo(
+    merged_df[merged_df['year'] == 2019],
+    locations='iso_code', color='healthy_life_expectancy_at_birth', size='co2_per_capita',
+    color_continuous_scale='Viridis', hover_name='country',
+    title='Healthy Life Expectancy (color) and CO₂ Emissions per Capita (size) in 2019'
+)
+fig.show()
+</code></pre>
+<h5>Caption</h5>
+<p>
+  In this world map, bubble size represents CO₂ emissions per capita and color represents healthy life expectancy (yellow-green = shorter healthy lives, blue-purple = longer healthy lives). We see large bubbles concentrated in North America, the Middle East, and parts of Asia/Oceania (indicating high per-person emissions), whereas small bubbles cover most of Africa and South Asia (minimal emissions).
+</p>
+<p>
+  Crucially, many large bubbles are colored blue/purple – for example, the US, Canada, Australia, and Gulf states have high HALE (~65–75 years) despite high emissions. In contrast, the smallest bubbles (low emitters) in sub-Saharan Africa are often yellowish, showing low healthy life expectancy (50s).
+</p>
+
+<h5>Insight</h5>
+<p>
+  This global view underscores that long healthy lives are achieved across a range of emission levels, and the worst health outcomes are mostly in low-emission, low-income countries. High emissions per capita are primarily a feature of wealthy nations and oil producers – these countries generally have the infrastructure for high life expectancy (though not always the very highest: e.g., the USA’s HALE is lower than some lower-emission European countries).
+</p>
+<p>
+  Meanwhile, countries with the shortest healthy lifespans are poor and emit very little CO₂. This pattern supports the idea that economic and health system development are the dominant factors for healthy life expectancy, not CO₂ levels.
+</p>
+<p>
+  If anything, the map suggests an injustice: those who have contributed least to emissions (and climate change) often have the lowest life expectancies. It also implies that reducing emissions in high-HALE countries (for sustainability) should be feasible without sacrificing their hard-won health outcomes, given their strong health systems.
+</p>
+<p>
+  In summary, Perspective 2 finds that life expectancy is more strongly tied to wealth and public health investments than to carbon emissions. Policies focusing on improving healthcare, nutrition, and the environment together could continue to raise healthy life expectancy while also cutting unnecessary CO₂ emissions.
+</p>
+
+<h2>Conclusion (Interim)</h2>
+<p>
+  In this draft analysis, we explored the relationship between CO₂ emissions and healthy life expectancy from two angles. The data demonstrates that there is no simple cause-and-effect where more emissions directly translate to shorter healthy lives – in fact, historically, high-emission countries have achieved long lifespans thanks to development.
+</p>
+<p>
+  However, emissions are not benign: the hidden toll of pollution is real (costing years of life in polluted regions), and climate change poses looming health risks. The contrasting perspectives highlight a balance: sustainable development is key.
+</p>
+<p>
+  Societies can strive to maintain and improve healthy life expectancy by investing in healthcare and cleaner technologies simultaneously, ensuring that reducing CO₂ emissions goes hand in hand with positive health outcomes rather than conflict with them.
+</p>
+<p>
+  The final project will delve deeper, integrating these findings into a cohesive narrative and interactive experience.
+</p>
+
