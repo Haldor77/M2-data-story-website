@@ -1,17 +1,14 @@
 import pandas as pd
 import plotly.express as px
-import plotly.offline as pyo
+from plotly.offline import plot
 
-# 1. Data inladen of samenstellen
-data = {
-    'country': ['Country A', 'Country B', 'Country C', 'Country A', 'Country B', 'Country C'],
-    'year': [2000, 2000, 2000, 2021, 2021, 2021],
-    'co2_per_capita': [5.1, 10.2, 2.3, 6.7, 12.5, 2.8],
-    'healthy_life_expectancy_at_birth': [60.2, 65.4, 55.8, 62.5, 67.8, 57.1]
-}
-merged_df = pd.DataFrame(data)
-
-# 2. Maak de interactieve scatterplot
+# 1. Maak je figuur (gebruik je eigen merged_df)
+merged_df = pd.DataFrame({
+    'country': ['Country A','Country B','Country C','Country A','Country B','Country C'],
+    'year':    [2000,        2000,        2000,        2021,        2021,        2021],
+    'co2_per_capita':              [5.1,         10.2,         2.3,          6.7,         12.5,         2.8],
+    'healthy_life_expectancy_at_birth': [60.2,        65.4,        55.8,         62.5,        67.8,        57.1]
+})
 fig = px.scatter(
     merged_df,
     x='co2_per_capita',
@@ -26,12 +23,23 @@ fig = px.scatter(
     title='CO₂ Emissies vs Gezonde Levensverwachting'
 )
 
-# 3. Exporteer naar HTML-bestand
-output_file = 'visualization.html'
-pyo.plot(
+# 2. Genereer de standalone DIV (zonder de full HTML wrapper)
+plot_div = plot(
     fig,
-    filename=output_file,
-    auto_open=False,
-    include_plotlyjs='cdn'
+    include_plotlyjs='cdn',  # laad Plotly.js automatisch
+    output_type='div'
 )
-print(f"HTML opgeslagen als {output_file}")
+
+# 3. Lees je bestaande HTML
+input_path = r"C:\M2-data-story-website\co2_health_life_expectancy.html"
+with open(input_path, 'r', encoding='utf-8') as f:
+    html = f.read()
+
+# 4. Vervang de placeholder door je plot_div
+new_html = html.replace('<!-- PLOTLY_PLACEHOLDER -->', plot_div)
+
+# 5. Schrijf het resultaat terug
+with open(input_path, 'w', encoding='utf-8') as f:
+    f.write(new_html)
+
+print("Grafiek succesvol ingebed in bestaande HTML 🎉")
