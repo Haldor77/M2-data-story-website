@@ -52,57 +52,7 @@
   <p>Below is a Python snippet illustrating the preprocessing using <code>pandas</code>:</p>
 
   <pre><code>import pandas as pd
-<style>
-    body {
-      font-family: sans-serif;
-      line-height: 1.6;
-      padding: 20px;
-      background-color: #fafafa;
-    }
-    pre {
-      background-color: #272822;
-      color: #f8f8f2;
-      padding: 16px;
-      border-radius: 4px;
-      overflow-x: auto;
-    }
-    code {
-      font-family: monospace;
-      font-size: 0.95em;
-    }
-  </style>
-</head>
-<body>
 
-  <!-- Pagina-titel -->
-  <h1>Voorbeeld: Preprocessing met Pandas</h1>
-  <p>Onderstaand staat de Python-code om CO₂-emissies en gezonde levensverwachting voor geselecteerde jaren te combineren.</p>
-
-  <!-- Het code-blok -->
-  <pre><code>import pandas as pd
-
-# 1) Datasets inladen
-co2 = pd.read_csv("co2_emissions.csv")
-hale = pd.read_csv("healthy_life_expectancy.csv")
-
-# 2) Alleen de gewenste jaren selecteren
-years = [2000, 2010, 2015, 2019, 2021]
-co2 = co2[co2['year'].isin(years)]
-hale = hale[hale['year'].isin(years)]
-
-# 3) Relevante kolommen kiezen
-co2 = co2[['country', 'iso_code', 'year', 'co2_per_capita', 'cumulative_co2']]
-hale = hale[['country', 'year', 'healthy_life_expectancy_at_birth']]
-
-# 4) Samenvoegen op land en jaar, en lege waarden verwijderen
-merged_df = pd.merge(co2, hale, on=['country', 'year'], how='inner')
-merged_df.dropna(inplace=True)
-</code></pre>
-
-  <p>Je kunt deze HTML als basis gebruiken in je eigen dashboard of documentatie.  
-  Als je bijvoorbeeld syntax-highlighting wilt toevoegen, kun je een library zoals <a href="https://prismjs.com/" target="_blank">Prism.js</a> of <a href="https://highlightjs.org/" target="_blank">Highlight.js</a> integreren.</p>
-
-</body>
 # Load datasets
 co2 = pd.read_csv("co2_emissions.csv")
 hale = pd.read_csv("healthy_life_expectancy.csv")
